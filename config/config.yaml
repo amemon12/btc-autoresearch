@@ -1,0 +1,53 @@
+market: BTC-USD
+start_date: "2018-01-01"
+database_path: database/btc_autoresearch.sqlite
+data_dir: data
+vault_dir: obsidian_vault/BTC
+
+timeframes:
+  - 1d
+  - 4h
+
+active_strategy_limit: 3
+
+llm:
+  provider: ollama
+  model: llama3.1
+  url: http://localhost:11434/api/generate
+
+backtest:
+  fee_rate: 0.001
+  slippage_rate: 0.0005
+
+retirement:
+  max_paper_drawdown: 0.15
+  min_closed_trades: 3
+
+scoring:
+  weights:
+    profit_factor: 0.35
+    max_drawdown: 0.25
+    sharpe_ratio: 0.20
+    win_rate: 0.10
+    trade_count_stability: 0.10
+  reject:
+    max_drawdown: 0.25
+    profit_factor: 1.2
+    trades: 30
+
+risk:
+  max_account_allocation_per_strategy: 0.25
+  account_risk_per_trade: 0.01
+  daily_kill_switch_loss: 0.03
+  max_open_strategies: 3
+  max_concurrent_positions: 3
+  allow_leverage: false
+  allow_shorting: false
+  allow_averaging_down: false
+
+paper_trading:
+  broker: alpaca_paper
+  enabled: true
+  submit_orders: false
+  alpaca_base_url: https://paper-api.alpaca.markets
+  starting_cash: 100000

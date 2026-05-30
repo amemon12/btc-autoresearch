@@ -1,0 +1,25 @@
+[project]
+name = "btc-autoresearch"
+version = "0.1.0"
+description = "Local Bitcoin strategy research, backtesting, scoring, and paper-trading lab."
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.1",
+  "pyyaml>=6.0",
+  "yfinance>=0.2.40",
+  "streamlit>=1.35",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+btc-lab = "btc_autoresearch.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["btc_autoresearch*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

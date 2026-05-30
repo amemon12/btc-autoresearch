@@ -1,0 +1,19 @@
+name: RSI Mean Reversion
+market: BTC/USD
+timeframe: 1d
+source: local_seed
+entry:
+  rsi:
+    params:
+      period: 14
+    operator: "<"
+    value: 30
+exit:
+  rsi:
+    params:
+      period: 14
+    operator: ">"
+    value: 55
+risk:
+  stop_loss: 0.04
+  take_profit: 0.08

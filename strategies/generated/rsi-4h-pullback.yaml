@@ -1,0 +1,19 @@
+name: RSI 4H Pullback
+market: BTC/USD
+timeframe: 4h
+source: local-fallback
+entry:
+  rsi:
+    params:
+      period: 14
+    operator: <
+    value: 35
+exit:
+  rsi:
+    params:
+      period: 14
+    operator: '>'
+    value: 60
+risk:
+  stop_loss: 0.035
+  take_profit: 0.07

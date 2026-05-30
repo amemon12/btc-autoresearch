@@ -1,0 +1,19 @@
+name: SMA Trend Following
+market: BTC/USD
+timeframe: 1d
+source: local_seed
+entry:
+  close:
+    operator: ">"
+    other_indicator: sma
+    other_params:
+      period: 100
+exit:
+  close:
+    operator: "<"
+    other_indicator: sma
+    other_params:
+      period: 50
+risk:
+  stop_loss: 0.08
+  take_profit: 0.20

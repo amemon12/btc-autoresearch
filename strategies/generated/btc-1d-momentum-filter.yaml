@@ -1,0 +1,19 @@
+name: BTC 1D Momentum Filter
+market: BTC/USD
+timeframe: 1d
+source: local-fallback
+entry:
+  close:
+    operator: '>'
+    other_indicator: sma
+    other_params:
+      period: 200
+exit:
+  close:
+    operator: <
+    other_indicator: sma
+    other_params:
+      period: 100
+risk:
+  stop_loss: 0.1
+  take_profit: 0.24

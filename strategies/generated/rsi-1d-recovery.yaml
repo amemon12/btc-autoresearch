@@ -1,0 +1,19 @@
+name: RSI 1D Recovery
+market: BTC/USD
+timeframe: 1d
+source: local-fallback
+entry:
+  rsi:
+    params:
+      period: 10
+    operator: <
+    value: 40
+exit:
+  rsi:
+    params:
+      period: 10
+    operator: '>'
+    value: 65
+risk:
+  stop_loss: 0.06
+  take_profit: 0.12
