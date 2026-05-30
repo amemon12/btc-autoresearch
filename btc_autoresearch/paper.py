@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sqlite3
 from pathlib import Path
 
@@ -108,13 +109,40 @@ def has_open_paper_trade(conn: sqlite3.Connection, strategy_name: str) -> bool:
     return row is not None
 
 
-def maybe_submit_alpaca_order(strategy: Strategy, order: dict, config: dict) -> dict | None:
+def submission_enabled(config: dict) -> bool:
+    """Whether orders should be submitted to Alpaca.
+
+    Requires paper_trading.enabled, plus either config `submit_orders: true` or the
+    `ALPACA_SUBMIT_ORDERS` env override (so submission can be turned on per-run without
+    committing a dangerous default to the repo).
+    """
     paper_config = config.get("paper_trading", {})
-    if not paper_config.get("enabled", False) or not paper_config.get("submit_orders", False):
+    if not paper_config.get("enabled", False):
+        return False
+    env_override = os.environ.get("ALPACA_SUBMIT_ORDERS", "").strip().lower() in ("1", "true", "yes", "on")
+    return bool(paper_config.get("submit_orders", False) or env_override)
+
+
+def verify_alpaca_connection(config: dict) -> dict:
+    """Read-only pre-flight: confirm credentials work before any orders are sent. Fails loudly."""
+    credentials = load_alpaca_credentials(config)
+    if credentials is None:
+        raise ValueError(
+            "Order submission is enabled but Alpaca credentials are missing; "
+            "set APCA_API_KEY_ID and APCA_API_SECRET_KEY."
+        )
+    return AlpacaPaperClient(credentials).get_account()
+
+
+def maybe_submit_alpaca_order(strategy: Strategy, order: dict, config: dict) -> dict | None:
+    if not submission_enabled(config):
         return None
     credentials = load_alpaca_credentials(config)
     if credentials is None:
-        return None
+        raise ValueError(
+            "Order submission is enabled but Alpaca credentials are missing; "
+            "set APCA_API_KEY_ID and APCA_API_SECRET_KEY."
+        )
     symbol = strategy.market.replace("-", "/")
     client = AlpacaPaperClient(credentials)
     return client.submit_crypto_market_order(symbol=symbol, qty=order["quantity"], side=order["side"])

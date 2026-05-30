@@ -98,9 +98,19 @@ def cmd_paper(args: argparse.Namespace) -> None:
         has_open_paper_trade,
         maybe_submit_alpaca_order,
         save_paper_order,
+        submission_enabled,
+        verify_alpaca_connection,
     )
 
     config = load_config(args.config)
+    if submission_enabled(config.values):
+        account = verify_alpaca_connection(config.values)
+        append_log(config.root, f"alpaca preflight status={account.get('status')} request_id={account.get('_request_id')}")
+        print(
+            f"Alpaca paper account OK: status={account.get('status')} "
+            f"cash={account.get('cash')} buying_power={account.get('buying_power')} "
+            f"request_id={account.get('_request_id')}"
+        )
     all_strategies = load_all_strategies([config.root / "strategies/generated", config.root / "strategies/yaml"])
     strategies = {strategy.name: strategy for strategy in all_strategies}
     with connect(config.database_path) as conn:
@@ -128,8 +138,13 @@ def cmd_paper(args: argparse.Namespace) -> None:
             response = maybe_submit_alpaca_order(strategy, order, config.values)
             save_paper_order(conn, order)
             mode = "submitted to Alpaca paper" if response else "recorded locally"
-            append_log(config.root, f"paper {strategy.name} {mode} qty={order['quantity']:.8f} price={price:.2f}")
-            print(f"{strategy.name}: {mode}, qty={order['quantity']:.8f}, price={price:.2f}")
+            request_id = response.get("_request_id") if response else None
+            append_log(
+                config.root,
+                f"paper {strategy.name} {mode} qty={order['quantity']:.8f} price={price:.2f} request_id={request_id}",
+            )
+            suffix = f", request_id={request_id}" if request_id else ""
+            print(f"{strategy.name}: {mode}, qty={order['quantity']:.8f}, price={price:.2f}{suffix}")
         latest_price = None
         data_path = config.data_dir / f"{config.values['market'].lower()}_4h.csv"
         if data_path.exists():
